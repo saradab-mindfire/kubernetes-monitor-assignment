@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: monitoring-worker
+  namespace: monitoring-app
+
+spec:
+  replicas: 3
+
+  selector:
+    matchLabels:
+      app: monitoring-worker
+
+  template:
+    metadata:
+      labels:
+        app: monitoring-worker
+
+    spec:
+      containers:
+        - name: app
+          image: monitoring-worker
+          imagePullPolicy: Never
+
+          envFrom:
+            - configMapRef:
+                name: worker-config
+
+            - secretRef:
+                name: worker-secret
