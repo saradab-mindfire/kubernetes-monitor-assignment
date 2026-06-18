@@ -3,6 +3,7 @@ Prerequisites
 
 1. Start Minikube
 minikube start
+minikube tunnel     -    open in a admin powershell
 
 2. Enable the ingress addon
 minikube addons enable ingress
@@ -14,7 +15,7 @@ minikube image build -f apps/worker/Dockerfile -t monitoring-worker .
 
 Deploy Everything
 
-Since you're using Kustomize, a single command deploys the full stack (namespace → postgres → redis → worker → app → ingress):
+Since you're using Kustomize, a single command deploys the full stack (namespace → redis → worker → app → ingress):
 
 kubectl apply -k k8s/
 

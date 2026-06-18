@@ -6,3 +6,4 @@ resources:
   - app.secret.yaml
   - app.deployment.yaml
   - app.service.yaml
+  - app.hpa.yaml

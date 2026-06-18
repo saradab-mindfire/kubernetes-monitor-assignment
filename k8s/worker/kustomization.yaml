@@ -6,3 +6,4 @@ resources:
   - worker.secret.yaml
   - worker.deployment.yaml
   - worker.service.yaml
+  - worker.hpa.yaml

@@ -1,6 +1,10 @@
 import express, { Request, Response } from "express";
 import config from "./utils/config";
-import { enqueueJob, getJobStatus } from "./helpers/redis/enqueue";
+import {
+  enqueueJob,
+  getAllJobStatues,
+  getJobStatus,
+} from "./helpers/redis/enqueue";
 
 const app = express();
 app.use(express.json());
@@ -20,8 +24,8 @@ app.post("/submit", async (req: Request, res: Response) => {
 
     const job = {
       id: uuid(),
-      type: data.type,
-      payload: data.payload,
+      type: data.type ?? "prime",
+      payload: data.payload ?? "10000",
       status: "queued" as const,
       createdAt: Date.now(),
     };
@@ -47,6 +51,16 @@ app.post("/status/:id", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching job status:", error);
     res.status(500).json({ message: "Failed to fetch job status." });
+  }
+});
+
+app.get("/jobs", async (req: Request, res: Response) => {
+  try {
+    const jobStatuses = await getAllJobStatues();
+    res.status(200).json({ jobStatuses });
+  } catch (error) {
+    console.error("Error fetching all job statuses:", error);
+    res.status(500).json({ message: "Failed to fetch all job statuses." });
   }
 });
 

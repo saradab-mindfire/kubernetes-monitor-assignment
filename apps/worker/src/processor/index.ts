@@ -9,7 +9,7 @@ export async function processJob(jobType: JobType, payload: string) {
       calculatePrimes(Number(payload));
       break;
     case "bcrypt":
-      hashPassword(payload);
+      await hashPassword(payload);
       break;
     case "sorting":
       sortLargeArray(Number(payload));

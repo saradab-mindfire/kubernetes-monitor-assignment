@@ -1,43 +1,47 @@
 import redisClient from "./helpers/redis";
+import { Job, JobStatus } from "./utils/job.types";
 import { processJob } from "./processor";
+
+const JOBS_HASH = "jobs";
+
+async function updateJobStatus(jobId: string, status: JobStatus): Promise<void> {
+  const raw = await redisClient.hget(JOBS_HASH, jobId);
+  const job: Partial<Job> = raw ? JSON.parse(raw) : { id: jobId };
+  await redisClient.hset(JOBS_HASH, jobId, JSON.stringify({ ...job, status }));
+}
 
 async function runWorker() {
   console.log("worker started, waiting for jobs...");
   while (true) {
+    let jobId: string | undefined;
     try {
-      // BRPOP returns [key, value] when an item is available
       const res = await redisClient.brpop("job_queue", 0);
+      console.log("Received job from queue:", res);
       if (!res) continue;
       const raw = Array.isArray(res) ? res[1] : res;
       const job = JSON.parse(raw as string);
+      jobId = job.id;
 
       console.log(
         `Processing job ${job.id} of type ${job.type} with payload:`,
         job.payload,
       );
 
-      // mark as processing
-      await redisClient.hset(
-        "job_status",
-        job.id,
-        JSON.stringify({ status: "processing" }),
-      );
+      await updateJobStatus(job.id, "processing");
 
-      // Process the job based on its type
-      await processJob(job.type, job.payload);
-      // simulate work
-      await new Promise((r) => setTimeout(r, 1000));
-
-      // mark as completed
-      await redisClient.hset(
-        "job_status",
-        job.id,
-        JSON.stringify({ status: "completed" }),
-      );
-      console.log(`Job ${job.id} completed`);
+      try {
+        await processJob(job.type, job.payload);
+        await updateJobStatus(job.id, "completed");
+        console.log(`Job ${job.id} completed`);
+      } catch (err) {
+        await updateJobStatus(job.id, "failed");
+        console.error(`Job ${job.id} failed:`, err);
+      }
     } catch (err) {
       console.error("Worker loop error:", err);
-      // small backoff on error
+      if (jobId) {
+        await updateJobStatus(jobId, "failed").catch(() => {});
+      }
       await new Promise((r) => setTimeout(r, 1000));
     }
   }

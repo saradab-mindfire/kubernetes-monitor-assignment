@@ -12,9 +12,14 @@ export interface Job {
   createdAt: number;
 }
 
+const JOBS_HASH = "jobs";
+
 export async function enqueueJob(job: Job): Promise<string> {
   try {
-    await redisClient.lpush("job_queue", JSON.stringify(job));
+    await Promise.all([
+      redisClient.lpush("job_queue", JSON.stringify(job)),
+      redisClient.hset(JOBS_HASH, job.id, JSON.stringify(job)),
+    ]);
     console.log(`Job ${job.id} enqueued successfully.`);
     return job.id;
   } catch (error) {
@@ -25,10 +30,24 @@ export async function enqueueJob(job: Job): Promise<string> {
 
 export async function getJobStatus(jobId: string): Promise<JobStatus | null> {
   try {
-    const jobData = await redisClient.hget("job_status", jobId);
-    return jobData ? (JSON.parse(jobData).status as JobStatus) : null;
+    const raw = await redisClient.hget(JOBS_HASH, jobId);
+    return raw ? (JSON.parse(raw).status as JobStatus) : null;
   } catch (error) {
     console.error(`Failed to get status for job ${jobId}:`, error);
+    throw error;
+  }
+}
+
+export async function getAllJobStatues(): Promise<Record<string, JobStatus>> {
+  try {
+    const all = await redisClient.hgetall(JOBS_HASH);
+    const result: Record<string, JobStatus> = {};
+    for (const [key, value] of Object.entries(all)) {
+      result[key] = JSON.parse(value).status as JobStatus;
+    }
+    return result;
+  } catch (error) {
+    console.error("Failed to get all job statuses:", error);
     throw error;
   }
 }

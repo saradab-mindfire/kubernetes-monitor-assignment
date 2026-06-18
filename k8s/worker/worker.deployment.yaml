@@ -6,7 +6,7 @@ metadata:
   namespace: monitoring-app
 
 spec:
-  replicas: 3
+  replicas: 1
 
   selector:
     matchLabels:
@@ -29,3 +29,21 @@ spec:
 
             - secretRef:
                 name: worker-secret
+
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+
+            limits:
+              cpu: 500m
+              memory: 512Mi
+
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - kill -0 1
+            periodSeconds: 10
+            failureThreshold: 3

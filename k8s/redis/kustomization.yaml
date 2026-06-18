@@ -3,7 +3,6 @@ kind: Kustomization
 
 resources:
   - redis.secret.yaml
-  - redis.pv.yaml
-  - redis.pvc.yaml
-  - redis.deployment.yaml
   - redis.service.yaml
+  - redis.headless-service.yaml
+  - redis.statefulset.yaml
