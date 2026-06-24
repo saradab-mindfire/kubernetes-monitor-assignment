@@ -11,6 +11,7 @@ minikube addons enable ingress
 3. Build images directly into Minikube
 minikube image build -f apps/api/Dockerfile -t monitoring-api .
 minikube image build -f apps/worker/Dockerfile -t monitoring-worker .
+minikube image build -f apps/stats/Dockerfile -t monitoring-stats .
 ---
 
 Deploy Everything
@@ -71,6 +72,10 @@ kubectl describe pod <pod-name> -n monitoring-app
 # Teardown everything
 
 kubectl delete -k k8s/
+
+# Enable metrics server
+
+minikube addons enable metrics-server
 
 ---
 

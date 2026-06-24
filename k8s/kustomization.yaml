@@ -5,5 +5,8 @@ resources:
   - namespace.yaml
   - redis/
   - worker/
+  - stats/
   - app/
+  - prometheus/
+  - grafana/
   - ingress.yml

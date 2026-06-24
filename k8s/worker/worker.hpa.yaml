@@ -11,7 +11,7 @@ spec:
     kind: Deployment
     name: monitoring-worker
 
-  minReplicas: 1
+  minReplicas: 2
   maxReplicas: 10
 
   metrics:
@@ -21,4 +21,4 @@ spec:
 
         target:
           type: Utilization
-          averageUtilization: 50
+          averageUtilization: 70

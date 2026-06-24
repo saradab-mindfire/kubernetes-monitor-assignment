@@ -5,6 +5,8 @@ import {
   getAllJobStatues,
   getJobStatus,
 } from "./helpers/redis/enqueue";
+import { buildMetricsText } from "./helpers/redis/metrics";
+import { buildStats } from "./helpers/redis/stats";
 
 const app = express();
 app.use(express.json());
@@ -61,6 +63,27 @@ app.get("/jobs", async (req: Request, res: Response) => {
   } catch (error) {
     console.error("Error fetching all job statuses:", error);
     res.status(500).json({ message: "Failed to fetch all job statuses." });
+  }
+});
+
+app.get("/stats", async (req: Request, res: Response) => {
+  try {
+    const stats = await buildStats();
+    res.status(200).json(stats);
+  } catch (error) {
+    console.error("Error building stats:", error);
+    res.status(500).json({ message: "Failed to build stats." });
+  }
+});
+
+app.get("/metrics", async (req: Request, res: Response) => {
+  try {
+    const text = await buildMetricsText();
+    res.set("Content-Type", "text/plain; version=0.0.4; charset=utf-8");
+    res.status(200).send(text);
+  } catch (error) {
+    console.error("Error building metrics:", error);
+    res.status(500).json({ message: "Failed to build metrics." });
   }
 });
 

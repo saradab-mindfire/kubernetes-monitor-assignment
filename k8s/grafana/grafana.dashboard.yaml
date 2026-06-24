@@ -1,0 +1,250 @@
+apiVersion: v1
+kind: ConfigMap
+
+metadata:
+  name: grafana-dashboards
+  namespace: monitoring-app
+
+data:
+  monitoring.json: |
+    {
+      "uid": "microservices-monitoring",
+      "title": "Microservices Monitoring",
+      "timezone": "browser",
+      "refresh": "10s",
+      "schemaVersion": 38,
+      "version": 1,
+      "time": { "from": "now-1h", "to": "now" },
+      "tags": ["monitoring", "jobs", "redis"],
+      "graphTooltip": 1,
+      "panels": [
+        {
+          "id": 1,
+          "type": "stat",
+          "title": "Queue Depth",
+          "gridPos": { "x": 0, "y": 0, "w": 8, "h": 4 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "queue_length",
+              "legendFormat": "queue depth"
+            }
+          ],
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"] },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "thresholds" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 10 },
+                  { "color": "red", "value": 50 }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 2,
+          "type": "stat",
+          "title": "Total Jobs Submitted",
+          "gridPos": { "x": 8, "y": 0, "w": 8, "h": 4 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "total_jobs_submitted",
+              "legendFormat": "submitted"
+            }
+          ],
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"] },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "fixed", "fixedColor": "blue" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "blue", "value": null }]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 3,
+          "type": "stat",
+          "title": "Total Jobs Completed",
+          "gridPos": { "x": 16, "y": 0, "w": 8, "h": 4 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "total_jobs_completed",
+              "legendFormat": "completed"
+            }
+          ],
+          "options": {
+            "reduceOptions": { "calcs": ["lastNotNull"] },
+            "colorMode": "background",
+            "graphMode": "none",
+            "textMode": "auto",
+            "orientation": "auto"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "fixed", "fixedColor": "green" },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [{ "color": "green", "value": null }]
+              }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 4,
+          "type": "timeseries",
+          "title": "Jobs Processed Rate (per second)",
+          "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "rate(jobs_processed_total[5m])",
+              "legendFormat": "{{job_type}}"
+            }
+          ],
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "none" },
+            "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "unit": "reqps",
+              "custom": { "lineWidth": 2, "fillOpacity": 10, "spanNulls": false }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 5,
+          "type": "timeseries",
+          "title": "Job Error Rate (per second)",
+          "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "rate(job_errors_total[5m])",
+              "legendFormat": "{{job_type}}"
+            }
+          ],
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "none" },
+            "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "unit": "reqps",
+              "custom": { "lineWidth": 2, "fillOpacity": 10, "spanNulls": false }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 6,
+          "type": "timeseries",
+          "title": "Job Processing Time — P50 / P95 / P99",
+          "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "histogram_quantile(0.50, rate(job_processing_time_seconds_bucket[5m]))",
+              "legendFormat": "P50 {{job_type}}"
+            },
+            {
+              "refId": "B",
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "histogram_quantile(0.95, rate(job_processing_time_seconds_bucket[5m]))",
+              "legendFormat": "P95 {{job_type}}"
+            },
+            {
+              "refId": "C",
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "histogram_quantile(0.99, rate(job_processing_time_seconds_bucket[5m]))",
+              "legendFormat": "P99 {{job_type}}"
+            }
+          ],
+          "options": {
+            "tooltip": { "mode": "multi", "sort": "none" },
+            "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "unit": "s",
+              "custom": { "lineWidth": 2, "fillOpacity": 5, "spanNulls": false }
+            },
+            "overrides": []
+          }
+        },
+        {
+          "id": 7,
+          "type": "timeseries",
+          "title": "Queue Length Over Time",
+          "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": { "type": "prometheus", "uid": "prometheus" },
+              "expr": "queue_length",
+              "legendFormat": "queue length"
+            }
+          ],
+          "options": {
+            "tooltip": { "mode": "single", "sort": "none" },
+            "legend": { "showLegend": true, "displayMode": "list", "placement": "bottom" }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "unit": "short",
+              "custom": { "lineWidth": 2, "fillOpacity": 20, "spanNulls": false },
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 10 },
+                  { "color": "red", "value": 50 }
+                ]
+              }
+            },
+            "overrides": []
+          }
+        }
+      ]
+    }

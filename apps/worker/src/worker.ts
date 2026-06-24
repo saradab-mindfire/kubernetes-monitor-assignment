@@ -1,6 +1,7 @@
 import redisClient from "./helpers/redis";
 import { Job, JobStatus } from "./utils/job.types";
 import { processJob } from "./processor";
+import { incJobsProcessed, incJobErrors, recordProcessingTime } from "./metrics";
 
 const JOBS_HASH = "jobs";
 
@@ -29,11 +30,22 @@ async function runWorker() {
 
       await updateJobStatus(job.id, "processing");
 
+      const startTime = Date.now();
       try {
         await processJob(job.type, job.payload);
+        const durationSeconds = (Date.now() - startTime) / 1000;
+        await Promise.all([
+          incJobsProcessed(job.type),
+          recordProcessingTime(job.type, durationSeconds),
+        ]);
         await updateJobStatus(job.id, "completed");
         console.log(`Job ${job.id} completed`);
       } catch (err) {
+        const durationSeconds = (Date.now() - startTime) / 1000;
+        await Promise.all([
+          incJobErrors(job.type),
+          recordProcessingTime(job.type, durationSeconds),
+        ]);
         await updateJobStatus(job.id, "failed");
         console.error(`Job ${job.id} failed:`, err);
       }

@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 
 metadata:
-  name: monitoring-app
+  name: monitoring-stats
   namespace: monitoring-app
 
 spec:
@@ -10,31 +10,31 @@ spec:
 
   selector:
     matchLabels:
-      app: monitoring-app
+      app: monitoring-stats
 
   template:
     metadata:
       labels:
-        app: monitoring-app
+        app: monitoring-stats
       annotations:
         prometheus.io/scrape: "true"
         prometheus.io/path: "/metrics"
-        prometheus.io/port: "3000"
+        prometheus.io/port: "3002"
 
     spec:
       containers:
         - name: app
-          image: monitoring-api
+          image: monitoring-stats
           imagePullPolicy: Never
           ports:
-            - containerPort: 3000
+            - containerPort: 3002
 
           envFrom:
             - configMapRef:
-                name: app-config
+                name: stats-config
 
             - secretRef:
-                name: app-secret
+                name: stats-secret
 
           resources:
             requests:
@@ -48,20 +48,20 @@ spec:
           startupProbe:
             httpGet:
               path: /health
-              port: 3000
+              port: 3002
             failureThreshold: 10
             periodSeconds: 5
 
           livenessProbe:
             httpGet:
               path: /health
-              port: 3000
+              port: 3002
             periodSeconds: 10
             failureThreshold: 3
 
           readinessProbe:
             httpGet:
               path: /health
-              port: 3000
+              port: 3002
             periodSeconds: 5
             failureThreshold: 3
