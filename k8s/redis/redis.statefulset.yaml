@@ -47,8 +47,10 @@ spec:
               command:
                 - sh
                 - -c
-                - redis-cli -a $REDIS_PASSWORD ping
+                - redis-cli --no-auth-warning -a $REDIS_PASSWORD ping
+            initialDelaySeconds: 15
             periodSeconds: 10
+            timeoutSeconds: 5
             failureThreshold: 3
 
           readinessProbe:
@@ -56,8 +58,10 @@ spec:
               command:
                 - sh
                 - -c
-                - redis-cli -a $REDIS_PASSWORD ping
+                - redis-cli --no-auth-warning -a $REDIS_PASSWORD ping
+            initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 5
             failureThreshold: 3
 
   volumeClaimTemplates:

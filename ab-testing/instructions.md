@@ -5,6 +5,7 @@
 # Run Stress Testing for Jobs Fetching
 
 .\ab.exe -n 500 -c 25 http://api.local/jobs
+/clear
 
 # Run And Test CPU Intensive Jobs
 

@@ -16,12 +16,18 @@ spec:
     metadata:
       labels:
         app: monitoring-worker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/path: "/metrics"
+        prometheus.io/port: "3001"
 
     spec:
       containers:
         - name: app
           image: monitoring-worker
           imagePullPolicy: Never
+          ports:
+            - containerPort: 3001
 
           envFrom:
             - configMapRef:
