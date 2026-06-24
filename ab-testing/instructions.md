@@ -9,7 +9,9 @@
 
 # Run And Test CPU Intensive Jobs
 
-.\ab.exe -n 500 -c 25 -p payload.json -T "application/json" http://api.local/submit
+.\ab.exe -n 500 -c 25 -p bcypt-payload.json -T "application/json" http://api.local/submit
+.\ab.exe -n 500 -c 25 -p prime-payload.json -T "application/json" http://api.local/submit
+.\ab.exe -n 500 -c 25 -p sorting-payload.json -T "application/json" http://api.local/submit
 
 # Check CPU And Processes
 
